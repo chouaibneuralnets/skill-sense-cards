@@ -5,6 +5,7 @@ import { SkillCard } from "@/components/SkillCard";
 import { Loader2, Sparkles, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Skill {
   name: string;
@@ -28,6 +29,7 @@ const Index = () => {
   const [jobSkills, setJobSkills] = useState<Skill[]>([]);
   const [isLoadingJob, setIsLoadingJob] = useState(false);
   const [missingSkills, setMissingSkills] = useState<Skill[]>([]);
+  const [activeTab, setActiveTab] = useState("step1");
 
   const handleAnalyze = async () => {
     if (!cvText.trim()) {
@@ -57,6 +59,8 @@ const Index = () => {
       if (data?.skills) {
         setSkills(data.skills);
         toast.success(`${data.skills.length} compétences détectées !`);
+        // Activer et basculer vers l'onglet 2
+        setActiveTab("step2");
       }
     } catch (error) {
       console.error('Error:', error);
@@ -137,202 +141,175 @@ const Index = () => {
       </header>
 
       {/* Dashboard Main Content */}
-      <main className="container mx-auto px-6 py-12 max-w-7xl space-y-12">
-        
-        {/* Section Fonctionnalité */}
-        <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="bg-card rounded-3xl shadow-[0_8px_32px_-8px_hsl(220_20%_15%/0.12)] p-10 border border-border/40 backdrop-blur-sm hover:shadow-[0_12px_48px_-12px_hsl(220_20%_15%/0.18)] transition-shadow duration-500">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-accent/10 rounded-xl shadow-sm border border-accent/20">
-                <FileText className="w-7 h-7 text-accent" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
-                  Analysez Votre CV
-                </h2>
-                <p className="text-muted-foreground text-sm font-medium">
-                  Copiez-collez le contenu de votre CV pour une analyse approfondie
-                </p>
-              </div>
-            </div>
-            
-            <div className="space-y-6">
-              <Textarea
-                placeholder="Collez le contenu de votre CV ici... (expériences, formations, compétences, projets, etc.)"
-                value={cvText}
-                onChange={(e) => setCvText(e.target.value)}
-                className="min-h-[320px] text-base leading-relaxed resize-none border-2 focus:border-primary transition-all duration-300 rounded-2xl bg-background/50 shadow-[inset_0_2px_4px_0_hsl(220_20%_15%/0.05)] focus:shadow-[inset_0_2px_8px_0_hsl(220_20%_15%/0.08)]"
-              />
-              
-              <div className="flex justify-end">
-                <Button
-                  onClick={handleAnalyze}
-                  disabled={isLoading || !cvText.trim()}
-                  size="lg"
-                  className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary text-primary-foreground font-bold px-10 py-7 text-lg shadow-lg hover:shadow-[0_12px_48px_-12px_hsl(215_80%_52%/0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-2xl"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-                      Analyse en cours...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="mr-3 h-6 w-6" />
-                      Analyser mon CV
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
+      <main className="container mx-auto px-6 py-12 max-w-7xl">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-12">
+            <TabsTrigger value="step1" className="text-lg py-4">
+              Étape 1 : Analyser mon CV
+            </TabsTrigger>
+            <TabsTrigger value="step2" disabled={skills.length === 0} className="text-lg py-4">
+              Étape 2 : Analyse des Écarts
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Section Résultats */}
-        {skills.length > 0 && (
-          <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="mb-8 text-center">
-              <div className="inline-flex items-center gap-3 px-6 py-3 bg-accent/10 border border-accent/20 rounded-full mb-4">
-                <Sparkles className="w-6 h-6 text-accent" />
-                <span className="text-accent font-semibold text-lg">
-                  {skills.length} compétence{skills.length > 1 ? 's' : ''} détectée{skills.length > 1 ? 's' : ''}
-                </span>
-              </div>
-              <h2 className="text-4xl font-bold text-foreground">
-                Vos Compétences Analysées
-              </h2>
-              <p className="text-muted-foreground mt-2">
-                Voici les compétences extraites de votre CV avec leur niveau de confiance
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {skills.map((skill, index) => (
-                <div
-                  key={index}
-                  className="animate-in fade-in slide-in-from-bottom-4"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <SkillCard
-                    name={skill.name}
-                    confidence={skill.confidence}
-                    evidence={skill.evidence}
-                    onDelete={() => {
-                      setSkills(skills.filter((_, i) => i !== index));
-                      toast.success("Compétence supprimée");
-                    }}
+          {/* Onglet 1 : Analyser mon CV */}
+          <TabsContent value="step1" className="space-y-8">
+            <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="bg-card rounded-3xl shadow-[0_8px_32px_-8px_hsl(220_20%_15%/0.12)] p-10 border border-border/40 backdrop-blur-sm hover:shadow-[0_12px_48px_-12px_hsl(220_20%_15%/0.18)] transition-shadow duration-500">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-accent/10 rounded-xl shadow-sm border border-accent/20">
+                    <FileText className="w-7 h-7 text-accent" />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
+                      Analysez Votre CV
+                    </h2>
+                    <p className="text-muted-foreground text-sm font-medium">
+                      Copiez-collez le contenu de votre CV pour une analyse approfondie
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-6">
+                  <Textarea
+                    placeholder="Collez le contenu de votre CV ici... (expériences, formations, compétences, projets, etc.)"
+                    value={cvText}
+                    onChange={(e) => setCvText(e.target.value)}
+                    className="min-h-[320px] text-base leading-relaxed resize-none border-2 focus:border-primary transition-all duration-300 rounded-2xl bg-background/50 shadow-[inset_0_2px_4px_0_hsl(220_20%_15%/0.05)] focus:shadow-[inset_0_2px_8px_0_hsl(220_20%_15%/0.08)]"
                   />
+                  
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleAnalyze}
+                      disabled={isLoading || !cvText.trim()}
+                      size="lg"
+                      className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary text-primary-foreground font-bold px-10 py-7 text-lg shadow-lg hover:shadow-[0_12px_48px_-12px_hsl(215_80%_52%/0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-2xl"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                          Analyse en cours...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-3 h-6 w-6" />
+                          Analyser mon CV
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </section>
-        )}
+              </div>
+            </section>
 
-        {/* Section Analyse des Écarts */}
-        {skills.length > 0 && (
-          <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="bg-card rounded-3xl shadow-[0_8px_32px_-8px_hsl(220_20%_15%/0.12)] p-10 border border-border/40 backdrop-blur-sm hover:shadow-[0_12px_48px_-12px_hsl(220_20%_15%/0.18)] transition-shadow duration-500">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-accent/10 rounded-xl shadow-sm border border-accent/20">
-                  <FileText className="w-7 h-7 text-accent" />
+            {/* Empty State */}
+            {!isLoading && skills.length === 0 && cvText.trim() === "" && (
+              <section className="text-center py-20 animate-in fade-in duration-700">
+                <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 mb-8 shadow-lg">
+                  <FileText className="w-12 h-12 text-primary" />
                 </div>
-                <div>
-                  <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
-                    Analyse des Écarts de Compétences
+                <h3 className="text-3xl font-bold text-foreground mb-3">
+                  Prêt à Commencer ?
+                </h3>
+                <p className="text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">
+                  Collez le contenu de votre CV dans le champ ci-dessus, puis cliquez sur <span className="font-semibold text-primary">"Analyser mon CV"</span> pour découvrir vos compétences principales avec des scores de confiance détaillés.
+                </p>
+              </section>
+            )}
+          </TabsContent>
+
+          {/* Onglet 2 : Analyse des Écarts */}
+          <TabsContent value="step2" className="space-y-12">
+            {/* Section Analyse des Écarts */}
+            <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="bg-card rounded-3xl shadow-[0_8px_32px_-8px_hsl(220_20%_15%/0.12)] p-10 border border-border/40 backdrop-blur-sm hover:shadow-[0_12px_48px_-12px_hsl(220_20%_15%/0.18)] transition-shadow duration-500">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-accent/10 rounded-xl shadow-sm border border-accent/20">
+                    <FileText className="w-7 h-7 text-accent" />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
+                      Analyse des Écarts de Compétences
+                    </h2>
+                    <p className="text-muted-foreground text-sm font-medium">
+                      Comparez vos compétences avec une offre d'emploi
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-6">
+                  <Textarea
+                    placeholder="Collez une offre d'emploi ici..."
+                    value={jobText}
+                    onChange={(e) => setJobText(e.target.value)}
+                    className="min-h-[320px] text-base leading-relaxed resize-none border-2 focus:border-primary transition-all duration-300 rounded-2xl bg-background/50 shadow-[inset_0_2px_4px_0_hsl(220_20%_15%/0.05)] focus:shadow-[inset_0_2px_8px_0_hsl(220_20%_15%/0.08)]"
+                  />
+                  
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleAnalyzeJob}
+                      disabled={isLoadingJob || !jobText.trim()}
+                      size="lg"
+                      className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary text-primary-foreground font-bold px-10 py-7 text-lg shadow-lg hover:shadow-[0_12px_48px_-12px_hsl(215_80%_52%/0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-2xl"
+                    >
+                      {isLoadingJob ? (
+                        <>
+                          <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                          Analyse en cours...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-3 h-6 w-6" />
+                          Analyser l'offre
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Section Compétences Manquantes */}
+            {missingSkills.length > 0 && (
+              <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="mb-8 text-center">
+                  <div className="inline-flex items-center gap-3 px-6 py-3 bg-destructive/10 border border-destructive/20 rounded-full mb-4">
+                    <Sparkles className="w-6 h-6 text-destructive" />
+                    <span className="text-destructive font-semibold text-lg">
+                      {missingSkills.length} compétence{missingSkills.length > 1 ? 's' : ''} manquante{missingSkills.length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <h2 className="text-4xl font-bold text-foreground">
+                    Compétences Manquantes pour ce Poste
                   </h2>
-                  <p className="text-muted-foreground text-sm font-medium">
-                    Comparez vos compétences avec une offre d'emploi
+                  <p className="text-muted-foreground mt-2">
+                    Ces compétences sont demandées dans l'offre mais absentes de votre CV
                   </p>
                 </div>
-              </div>
-              
-              <div className="space-y-6">
-                <Textarea
-                  placeholder="Collez une offre d'emploi ici..."
-                  value={jobText}
-                  onChange={(e) => setJobText(e.target.value)}
-                  className="min-h-[320px] text-base leading-relaxed resize-none border-2 focus:border-primary transition-all duration-300 rounded-2xl bg-background/50 shadow-[inset_0_2px_4px_0_hsl(220_20%_15%/0.05)] focus:shadow-[inset_0_2px_8px_0_hsl(220_20%_15%/0.08)]"
-                />
                 
-                <div className="flex justify-end">
-                  <Button
-                    onClick={handleAnalyzeJob}
-                    disabled={isLoadingJob || !jobText.trim()}
-                    size="lg"
-                    className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary text-primary-foreground font-bold px-10 py-7 text-lg shadow-lg hover:shadow-[0_12px_48px_-12px_hsl(215_80%_52%/0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-2xl"
-                  >
-                    {isLoadingJob ? (
-                      <>
-                        <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-                        Analyse en cours...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="mr-3 h-6 w-6" />
-                        Analyser l'offre
-                      </>
-                    )}
-                  </Button>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {missingSkills.map((skill, index) => (
+                    <div
+                      key={index}
+                      className="animate-in fade-in slide-in-from-bottom-4"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <SkillCard
+                        name={skill.name}
+                        confidence={skill.confidence}
+                        evidence={skill.evidence}
+                        onDelete={() => {
+                          setMissingSkills(missingSkills.filter((_, i) => i !== index));
+                          toast.success("Compétence supprimée");
+                        }}
+                      />
+                    </div>
+                  ))}
                 </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Section Compétences Manquantes */}
-        {missingSkills.length > 0 && (
-          <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="mb-8 text-center">
-              <div className="inline-flex items-center gap-3 px-6 py-3 bg-destructive/10 border border-destructive/20 rounded-full mb-4">
-                <Sparkles className="w-6 h-6 text-destructive" />
-                <span className="text-destructive font-semibold text-lg">
-                  {missingSkills.length} compétence{missingSkills.length > 1 ? 's' : ''} manquante{missingSkills.length > 1 ? 's' : ''}
-                </span>
-              </div>
-              <h2 className="text-4xl font-bold text-foreground">
-                Compétences Manquantes pour ce Poste
-              </h2>
-              <p className="text-muted-foreground mt-2">
-                Ces compétences sont demandées dans l'offre mais absentes de votre CV
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {missingSkills.map((skill, index) => (
-                <div
-                  key={index}
-                  className="animate-in fade-in slide-in-from-bottom-4"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <SkillCard
-                    name={skill.name}
-                    confidence={skill.confidence}
-                    evidence={skill.evidence}
-                    onDelete={() => {
-                      setMissingSkills(missingSkills.filter((_, i) => i !== index));
-                      toast.success("Compétence supprimée");
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Empty State */}
-        {!isLoading && skills.length === 0 && cvText.trim() === "" && (
-          <section className="text-center py-20 animate-in fade-in duration-700">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 mb-8 shadow-lg">
-              <FileText className="w-12 h-12 text-primary" />
-            </div>
-            <h3 className="text-3xl font-bold text-foreground mb-3">
-              Prêt à Commencer ?
-            </h3>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">
-              Collez le contenu de votre CV dans le champ ci-dessus, puis cliquez sur <span className="font-semibold text-primary">"Analyser mon CV"</span> pour découvrir vos compétences principales avec des scores de confiance détaillés.
-            </p>
-          </section>
-        )}
+              </section>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Dashboard Footer */}
