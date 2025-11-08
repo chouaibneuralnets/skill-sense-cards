@@ -59,8 +59,6 @@ const Index = () => {
       if (data?.skills) {
         setSkills(data.skills);
         toast.success(`${data.skills.length} compétences détectées !`);
-        // Activer et basculer vers l'onglet 2
-        setActiveTab("step2");
       }
     } catch (error) {
       console.error('Error:', error);
@@ -145,14 +143,14 @@ const Index = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-12">
             <TabsTrigger value="step1" className="text-lg py-4">
-              Étape 1 : Analyser mon CV
+              Étape 1 : Mon Profil de Compétences
             </TabsTrigger>
             <TabsTrigger value="step2" disabled={skills.length === 0} className="text-lg py-4">
               Étape 2 : Analyse des Écarts
             </TabsTrigger>
           </TabsList>
 
-          {/* Onglet 1 : Analyser mon CV */}
+          {/* Onglet 1 : Mon Profil de Compétences */}
           <TabsContent value="step1" className="space-y-8">
             <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="bg-card rounded-3xl shadow-[0_8px_32px_-8px_hsl(220_20%_15%/0.12)] p-10 border border-border/40 backdrop-blur-sm hover:shadow-[0_12px_48px_-12px_hsl(220_20%_15%/0.18)] transition-shadow duration-500">
@@ -201,6 +199,46 @@ const Index = () => {
                 </div>
               </div>
             </section>
+
+            {/* Section Mes Compétences (CV) */}
+            {skills.length > 0 && (
+              <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="mb-8 text-center">
+                  <div className="inline-flex items-center gap-3 px-6 py-3 bg-accent/10 border border-accent/20 rounded-full mb-4">
+                    <Sparkles className="w-6 h-6 text-accent" />
+                    <span className="text-accent font-semibold text-lg">
+                      {skills.length} compétence{skills.length > 1 ? 's' : ''} détectée{skills.length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <h2 className="text-4xl font-bold text-foreground">
+                    Mes Compétences (CV)
+                  </h2>
+                  <p className="text-muted-foreground mt-2">
+                    Voici les compétences extraites de votre CV avec leur niveau de confiance
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {skills.map((skill, index) => (
+                    <div
+                      key={index}
+                      className="animate-in fade-in slide-in-from-bottom-4"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <SkillCard
+                        name={skill.name}
+                        confidence={skill.confidence}
+                        evidence={skill.evidence}
+                        onDelete={() => {
+                          setSkills(skills.filter((_, i) => i !== index));
+                          toast.success("Compétence supprimée");
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Empty State */}
             {!isLoading && skills.length === 0 && cvText.trim() === "" && (
