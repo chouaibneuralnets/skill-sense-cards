@@ -61,7 +61,18 @@ Deno.serve(async (req) => {
 
     const result = await model.generateContent(`${prompt}\n\nCV:\n${cvText}`);
     const response = await result.response;
-    const jsonText = response.text();
+    let jsonText = response.text();
+    
+    // --- DEBUT DU BLOC DE NETTOYAGE ---
+    // L'IA peut renvoyer ```json\n{...}\n```
+    // Nous extrayons le JSON pur en trouvant la première accolade { et la dernière }
+    const startIndex = jsonText.indexOf('{');
+    const endIndex = jsonText.lastIndexOf('}');
+
+    if (startIndex !== -1 && endIndex !== -1) {
+      jsonText = jsonText.substring(startIndex, endIndex + 1);
+    }
+    // --- FIN DU BLOC DE NETTOYAGE ---
     
     const parsedResult = JSON.parse(jsonText);
     const skills: Skill[] = parsedResult.skills || [];
