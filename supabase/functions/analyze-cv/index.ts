@@ -17,14 +17,90 @@ interface Skill {
   evidence: string;
 }
 
+// Fonction pour extraire le texte d'un fichier PDF
+async function extractTextFromPDF(arrayBuffer: ArrayBuffer): Promise<string> {
+  try {
+    // Utiliser pdf-parse via esm.sh avec Uint8Array (compatible Deno)
+    const pdfParse = await import('https://esm.sh/pdf-parse@1.1.1');
+    const uint8Array = new Uint8Array(arrayBuffer);
+    const data = await pdfParse.default(uint8Array);
+    return data.text;
+  } catch (error) {
+    console.error('Erreur lors de l\'extraction du PDF:', error);
+    throw new Error('Impossible d\'extraire le texte du PDF');
+  }
+}
+
+// Fonction pour extraire le texte d'un fichier DOCX
+async function extractTextFromDOCX(arrayBuffer: ArrayBuffer): Promise<string> {
+  try {
+    const mammoth = await import('https://esm.sh/mammoth@1.8.0');
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    return result.value;
+  } catch (error) {
+    console.error('Erreur lors de l\'extraction du DOCX:', error);
+    throw new Error('Impossible d\'extraire le texte du DOCX');
+  }
+}
+
+// Fonction pour extraire le texte d'un fichier TXT
+function extractTextFromTXT(arrayBuffer: ArrayBuffer): string {
+  const decoder = new TextDecoder('utf-8');
+  return decoder.decode(arrayBuffer);
+}
+
+// Fonction principale pour extraire le texte selon le type de fichier
+async function extractTextFromFile(arrayBuffer: ArrayBuffer, contentType: string, fileName: string): Promise<string> {
+  console.log(`Extraction du texte du fichier: ${fileName} (type: ${contentType})`);
+  
+  if (contentType.includes('pdf') || fileName.toLowerCase().endsWith('.pdf')) {
+    return await extractTextFromPDF(arrayBuffer);
+  } else if (
+    contentType.includes('vnd.openxmlformats-officedocument.wordprocessingml.document') || 
+    fileName.toLowerCase().endsWith('.docx')
+  ) {
+    return await extractTextFromDOCX(arrayBuffer);
+  } else if (contentType.includes('text/plain') || fileName.toLowerCase().endsWith('.txt')) {
+    return extractTextFromTXT(arrayBuffer);
+  } else {
+    throw new Error(`Type de fichier non supporté: ${contentType}`);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { cvText } = await req.json();
+    // Recevoir le fichier via FormData
+    const formData = await req.formData();
+    const file = formData.get('file') as File;
+
+    if (!file) {
+      return new Response(
+        JSON.stringify({ error: 'Aucun fichier envoyé' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`Fichier reçu: ${file.name}, type: ${file.type}, taille: ${file.size} bytes`);
+
+    // Lire le buffer du fichier
+    const fileBuffer = await file.arrayBuffer();
+
+    // Extraire le texte selon le type de fichier
+    const cvText = await extractTextFromFile(fileBuffer, file.type, file.name);
     
+    console.log(`Texte extrait (${cvText.length} caractères)`);
+
+    if (!cvText.trim()) {
+      return new Response(
+        JSON.stringify({ error: 'Le fichier ne contient aucun texte' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // !!! HACKATHON SOLUTION: Clé API en dur !!!
     const GOOGLE_API_KEY = "AIzaSyBcL7DKpoCebeuGEOUnJOk8so_mbKI1ruY";
 
@@ -41,7 +117,7 @@ Deno.serve(async (req) => {
       model: "gemini-2.5-flash-lite",
     });
 
-    console.log('Analyse du CV avec Gemini 2.5 Flash Lite...');
+    console.log('Analyse du CV (fichier) avec Gemini 2.5 Flash Lite...');
 
     const prompt = `
       Tu es un expert en recrutement technique et RH. Analyse le texte de CV suivant.
@@ -88,7 +164,7 @@ Deno.serve(async (req) => {
     console.error('Erreur détaillée dans la fonction d\'analyse:', error);
     return new Response(
       JSON.stringify({ 
-        error: "Erreur d'analyse IA", 
+        error: "Erreur d'analyse du fichier", 
         details: error instanceof Error ? error.message : 'Unknown error'
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
