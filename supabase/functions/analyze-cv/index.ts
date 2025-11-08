@@ -38,10 +38,10 @@ Deno.serve(async (req) => {
 
     const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash-latest",
+      model: "gemini-1.5-flash",
     });
 
-    console.log('Analyse du CV avec Gemini Flash...');
+    console.log('Analyse du CV avec Gemini 1.5 Flash...');
 
     const prompt = `
       Tu es un expert en recrutement technique et RH. Analyse le texte de CV suivant.
