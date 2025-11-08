@@ -55,75 +55,100 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground py-8 shadow-lg">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-3 justify-center">
-            <Sparkles className="w-8 h-8" />
-            <h1 className="text-4xl font-bold tracking-tight">SkillSense</h1>
+    <div className="min-h-screen bg-gradient-to-b from-background via-muted/10 to-background">
+      {/* Dashboard Header */}
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-primary via-primary-glow to-primary text-primary-foreground shadow-xl border-b border-primary-foreground/10">
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex items-center gap-4 justify-center">
+            <div className="p-3 bg-primary-foreground/10 rounded-xl backdrop-blur-sm">
+              <Sparkles className="w-10 h-10" />
+            </div>
+            <div>
+              <h1 className="text-5xl font-black tracking-tight">SkillSense</h1>
+              <p className="text-primary-foreground/90 text-lg font-medium mt-1">
+                Analyse de Compétences par IA
+              </p>
+            </div>
           </div>
-          <p className="text-center mt-2 text-primary-foreground/90 text-lg">
-            Analysez votre CV avec l'intelligence artificielle
-          </p>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-12 max-w-7xl">
-        {/* CV Input Section */}
-        <div className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="bg-card rounded-2xl shadow-lg p-8 border border-border">
-            <div className="flex items-center gap-2 mb-4">
-              <FileText className="w-6 h-6 text-primary" />
-              <h2 className="text-2xl font-semibold text-foreground">
-                Collez votre CV
-              </h2>
+      {/* Dashboard Main Content */}
+      <main className="container mx-auto px-6 py-12 max-w-7xl space-y-12">
+        
+        {/* Section Fonctionnalité */}
+        <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="bg-card rounded-3xl shadow-2xl p-10 border border-border/50 backdrop-blur-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <FileText className="w-7 h-7 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold text-foreground">
+                  Analysez Votre CV
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  Copiez-collez le contenu de votre CV pour une analyse approfondie
+                </p>
+              </div>
             </div>
-            <p className="text-muted-foreground mb-6">
-              Copiez et collez le contenu de votre CV dans le champ ci-dessous pour une analyse détaillée de vos compétences.
-            </p>
-            <Textarea
-              placeholder="Collez le contenu de votre CV ici... (expériences, formations, compétences, etc.)"
-              value={cvText}
-              onChange={(e) => setCvText(e.target.value)}
-              className="min-h-[300px] text-base leading-relaxed resize-none border-2 focus:border-primary transition-colors"
-            />
-            <div className="mt-6 flex justify-end">
-              <Button
-                onClick={handleAnalyze}
-                disabled={isLoading || !cvText.trim()}
-                size="lg"
-                className="bg-primary hover:bg-primary-glow text-primary-foreground font-semibold px-8 py-6 text-lg shadow-md hover:shadow-xl transition-all duration-300"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Analyse en cours...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-5 w-5" />
-                    Analyser mon CV
-                  </>
-                )}
-              </Button>
+            
+            <div className="space-y-6">
+              <Textarea
+                placeholder="Collez le contenu de votre CV ici... (expériences, formations, compétences, projets, etc.)"
+                value={cvText}
+                onChange={(e) => setCvText(e.target.value)}
+                className="min-h-[320px] text-base leading-relaxed resize-none border-2 focus:border-primary transition-all duration-300 rounded-xl bg-background/50"
+              />
+              
+              <div className="flex justify-end">
+                <Button
+                  onClick={handleAnalyze}
+                  disabled={isLoading || !cvText.trim()}
+                  size="lg"
+                  className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary text-primary-foreground font-bold px-10 py-7 text-lg shadow-lg hover:shadow-2xl transition-all duration-300 rounded-xl"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                      Analyse en cours...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-3 h-6 w-6" />
+                      Analyser mon CV
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Results Section */}
+        {/* Section Résultats */}
         {skills.length > 0 && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
-              🎯 Vos compétences détectées
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="mb-8 text-center">
+              <div className="inline-flex items-center gap-3 px-6 py-3 bg-accent/10 border border-accent/20 rounded-full mb-4">
+                <Sparkles className="w-6 h-6 text-accent" />
+                <span className="text-accent font-semibold text-lg">
+                  {skills.length} compétence{skills.length > 1 ? 's' : ''} détectée{skills.length > 1 ? 's' : ''}
+                </span>
+              </div>
+              <h2 className="text-4xl font-bold text-foreground">
+                Vos Compétences Analysées
+              </h2>
+              <p className="text-muted-foreground mt-2">
+                Voici les compétences extraites de votre CV avec leur niveau de confiance
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {skills.map((skill, index) => (
                 <div
                   key={index}
                   className="animate-in fade-in slide-in-from-bottom-4"
-                  style={{ animationDelay: `${index * 100}ms` }}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <SkillCard
                     name={skill.name}
@@ -137,30 +162,33 @@ const Index = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* Empty State */}
         {!isLoading && skills.length === 0 && cvText.trim() === "" && (
-          <div className="text-center py-16 animate-in fade-in duration-700">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-6">
-              <FileText className="w-10 h-10 text-primary" />
+          <section className="text-center py-20 animate-in fade-in duration-700">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 mb-8 shadow-lg">
+              <FileText className="w-12 h-12 text-primary" />
             </div>
-            <h3 className="text-2xl font-semibold text-foreground mb-2">
-              Commencez votre analyse
+            <h3 className="text-3xl font-bold text-foreground mb-3">
+              Prêt à Commencer ?
             </h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Collez le contenu de votre CV ci-dessus et cliquez sur "Analyser mon CV" pour découvrir vos compétences principales avec des scores de confiance.
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">
+              Collez le contenu de votre CV dans le champ ci-dessus, puis cliquez sur <span className="font-semibold text-primary">"Analyser mon CV"</span> pour découvrir vos compétences principales avec des scores de confiance détaillés.
             </p>
-          </div>
+          </section>
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-card border-t border-border mt-20 py-8">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p className="text-sm">
-            Réalisé par Chegdati Chouaib
+      {/* Dashboard Footer */}
+      <footer className="bg-card/50 backdrop-blur-sm border-t border-border mt-24 py-10">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-muted-foreground text-base font-medium">
+            Réalisé par <span className="text-foreground font-semibold">Chegdati Chouaib</span>
+          </p>
+          <p className="text-muted-foreground/60 text-sm mt-2">
+            Propulsé par l'Intelligence Artificielle • {new Date().getFullYear()}
           </p>
         </div>
       </footer>
