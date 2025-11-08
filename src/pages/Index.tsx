@@ -16,6 +16,10 @@ const Index = () => {
   const [cvText, setCvText] = useState("");
   const [skills, setSkills] = useState<Skill[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [jobText, setJobText] = useState("");
+  const [jobSkills, setJobSkills] = useState<Skill[]>([]);
+  const [isLoadingJob, setIsLoadingJob] = useState(false);
+  const [missingSkills, setMissingSkills] = useState<Skill[]>([]);
 
   const handleAnalyze = async () => {
     if (!cvText.trim()) {
@@ -51,6 +55,57 @@ const Index = () => {
       toast.error("Une erreur s'est produite");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAnalyzeJob = async () => {
+    if (!jobText.trim()) {
+      toast.error("Veuillez coller le contenu de l'offre d'emploi");
+      return;
+    }
+
+    if (skills.length === 0) {
+      toast.error("Veuillez d'abord analyser votre CV");
+      return;
+    }
+
+    setIsLoadingJob(true);
+    setJobSkills([]);
+    setMissingSkills([]);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-cv', {
+        body: { cvText: jobText }
+      });
+
+      if (error) {
+        console.error('Error calling function:', error);
+        toast.error("Erreur lors de l'analyse de l'offre");
+        return;
+      }
+
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      if (data?.skills) {
+        setJobSkills(data.skills);
+        
+        // Compare les compétences et trouve celles qui manquent
+        const cvSkillNames = skills.map(s => s.name.toLowerCase().trim());
+        const missing = data.skills.filter(
+          (jobSkill: Skill) => !cvSkillNames.includes(jobSkill.name.toLowerCase().trim())
+        );
+        
+        setMissingSkills(missing);
+        toast.success(`${missing.length} compétence${missing.length > 1 ? 's' : ''} manquante${missing.length > 1 ? 's' : ''} détectée${missing.length > 1 ? 's' : ''} !`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Une erreur s'est produite");
+    } finally {
+      setIsLoadingJob(false);
     }
   };
 
@@ -156,6 +211,97 @@ const Index = () => {
                     evidence={skill.evidence}
                     onDelete={() => {
                       setSkills(skills.filter((_, i) => i !== index));
+                      toast.success("Compétence supprimée");
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Section Analyse des Écarts */}
+        {skills.length > 0 && (
+          <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="bg-card rounded-3xl shadow-[0_8px_32px_-8px_hsl(220_20%_15%/0.12)] p-10 border border-border/40 backdrop-blur-sm hover:shadow-[0_12px_48px_-12px_hsl(220_20%_15%/0.18)] transition-shadow duration-500">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-accent/10 rounded-xl shadow-sm border border-accent/20">
+                  <FileText className="w-7 h-7 text-accent" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
+                    Analyse des Écarts de Compétences
+                  </h2>
+                  <p className="text-muted-foreground text-sm font-medium">
+                    Comparez vos compétences avec une offre d'emploi
+                  </p>
+                </div>
+              </div>
+              
+              <div className="space-y-6">
+                <Textarea
+                  placeholder="Collez une offre d'emploi ici..."
+                  value={jobText}
+                  onChange={(e) => setJobText(e.target.value)}
+                  className="min-h-[320px] text-base leading-relaxed resize-none border-2 focus:border-primary transition-all duration-300 rounded-2xl bg-background/50 shadow-[inset_0_2px_4px_0_hsl(220_20%_15%/0.05)] focus:shadow-[inset_0_2px_8px_0_hsl(220_20%_15%/0.08)]"
+                />
+                
+                <div className="flex justify-end">
+                  <Button
+                    onClick={handleAnalyzeJob}
+                    disabled={isLoadingJob || !jobText.trim()}
+                    size="lg"
+                    className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary text-primary-foreground font-bold px-10 py-7 text-lg shadow-lg hover:shadow-[0_12px_48px_-12px_hsl(215_80%_52%/0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-2xl"
+                  >
+                    {isLoadingJob ? (
+                      <>
+                        <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                        Analyse en cours...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-3 h-6 w-6" />
+                        Analyser l'offre
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Section Compétences Manquantes */}
+        {missingSkills.length > 0 && (
+          <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="mb-8 text-center">
+              <div className="inline-flex items-center gap-3 px-6 py-3 bg-destructive/10 border border-destructive/20 rounded-full mb-4">
+                <Sparkles className="w-6 h-6 text-destructive" />
+                <span className="text-destructive font-semibold text-lg">
+                  {missingSkills.length} compétence{missingSkills.length > 1 ? 's' : ''} manquante{missingSkills.length > 1 ? 's' : ''}
+                </span>
+              </div>
+              <h2 className="text-4xl font-bold text-foreground">
+                Compétences Manquantes pour ce Poste
+              </h2>
+              <p className="text-muted-foreground mt-2">
+                Ces compétences sont demandées dans l'offre mais absentes de votre CV
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {missingSkills.map((skill, index) => (
+                <div
+                  key={index}
+                  className="animate-in fade-in slide-in-from-bottom-4"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <SkillCard
+                    name={skill.name}
+                    confidence={skill.confidence}
+                    evidence={skill.evidence}
+                    onDelete={() => {
+                      setMissingSkills(missingSkills.filter((_, i) => i !== index));
                       toast.success("Compétence supprimée");
                     }}
                   />
