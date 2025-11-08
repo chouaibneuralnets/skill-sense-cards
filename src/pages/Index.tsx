@@ -129,6 +129,10 @@ const Index = () => {
                     name={skill.name}
                     confidence={skill.confidence}
                     evidence={skill.evidence}
+                    onDelete={() => {
+                      setSkills(skills.filter((_, i) => i !== index));
+                      toast.success("Compétence supprimée");
+                    }}
                   />
                 </div>
               ))}
