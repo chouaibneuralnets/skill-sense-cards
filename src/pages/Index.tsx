@@ -12,6 +12,14 @@ interface Skill {
   evidence: string;
 }
 
+const normalizeSkill = (skillName: string): string => {
+  if (!skillName) return '';
+  return skillName
+    .toLowerCase()
+    .replace(/\(.*?\)/g, '')  // Supprime tout ce qui est entre parenthèses
+    .trim();
+};
+
 const Index = () => {
   const [cvText, setCvText] = useState("");
   const [skills, setSkills] = useState<Skill[]>([]);
@@ -92,10 +100,10 @@ const Index = () => {
       if (data?.skills) {
         setJobSkills(data.skills);
         
-        // Compare les compétences et trouve celles qui manquent
-        const cvSkillNames = skills.map(s => s.name.toLowerCase().trim());
+        // Compare les compétences avec normalisation
+        const normalizedCvSkills = skills.map(s => normalizeSkill(s.name));
         const missing = data.skills.filter(
-          (jobSkill: Skill) => !cvSkillNames.includes(jobSkill.name.toLowerCase().trim())
+          (jobSkill: Skill) => !normalizedCvSkills.includes(normalizeSkill(jobSkill.name))
         );
         
         setMissingSkills(missing);
