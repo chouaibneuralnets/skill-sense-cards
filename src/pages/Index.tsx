@@ -33,7 +33,7 @@ const Index = () => {
 
   const handleAnalyze = async () => {
     if (!cvText.trim()) {
-      toast.error("Veuillez coller le contenu de votre CV");
+      toast.error("Please paste your CV content");
       return;
     }
 
@@ -47,7 +47,7 @@ const Index = () => {
 
       if (error) {
         console.error('Error calling function:', error);
-        toast.error("Erreur lors de l'analyse du CV");
+        toast.error("Error analyzing CV");
         return;
       }
 
@@ -58,11 +58,11 @@ const Index = () => {
 
       if (data?.skills) {
         setSkills(data.skills);
-        toast.success(`${data.skills.length} compétences détectées !`);
+        toast.success(`${data.skills.length} skills detected!`);
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error("Une erreur s'est produite");
+      toast.error("An error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -70,12 +70,12 @@ const Index = () => {
 
   const handleAnalyzeJob = async () => {
     if (!jobText.trim()) {
-      toast.error("Veuillez coller le contenu de l'offre d'emploi");
+      toast.error("Please paste the job offer content");
       return;
     }
 
     if (skills.length === 0) {
-      toast.error("Veuillez d'abord analyser votre CV");
+      toast.error("Please analyze your CV first");
       return;
     }
 
@@ -90,7 +90,7 @@ const Index = () => {
 
       if (error) {
         console.error('Error calling function:', error);
-        toast.error("Erreur lors de l'analyse de l'offre");
+        toast.error("Error analyzing job offer");
         return;
       }
 
@@ -109,11 +109,11 @@ const Index = () => {
         );
         
         setMissingSkills(missing);
-        toast.success(`${missing.length} compétence${missing.length > 1 ? 's' : ''} manquante${missing.length > 1 ? 's' : ''} détectée${missing.length > 1 ? 's' : ''} !`);
+        toast.success(`${missing.length} missing skill${missing.length > 1 ? 's' : ''} detected!`);
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error("Une erreur s'est produite");
+      toast.error("An error occurred");
     } finally {
       setIsLoadingJob(false);
     }
@@ -131,7 +131,7 @@ const Index = () => {
             <div>
               <h1 className="text-5xl font-black tracking-tight drop-shadow-sm">SkillSense</h1>
               <p className="text-primary-foreground/95 text-lg font-semibold mt-1 tracking-wide">
-                Analyse de Compétences par IA
+                AI Skill Analysis
               </p>
             </div>
           </div>
@@ -143,14 +143,14 @@ const Index = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-12">
             <TabsTrigger value="step1" className="text-lg py-4">
-              Étape 1 : Mon Profil de Compétences
+              Step 1: My Skill Profile
             </TabsTrigger>
             <TabsTrigger value="step2" disabled={skills.length === 0} className="text-lg py-4">
-              Étape 2 : Analyse des Écarts
+              Step 2: Gap Analysis
             </TabsTrigger>
           </TabsList>
 
-          {/* Onglet 1 : Mon Profil de Compétences */}
+          {/* Tab 1: My Skill Profile */}
           <TabsContent value="step1" className="space-y-8">
             <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="bg-card rounded-3xl shadow-[0_8px_32px_-8px_hsl(220_20%_15%/0.12)] p-10 border border-border/40 backdrop-blur-sm hover:shadow-[0_12px_48px_-12px_hsl(220_20%_15%/0.18)] transition-shadow duration-500">
@@ -160,17 +160,17 @@ const Index = () => {
                   </div>
                   <div>
                     <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
-                      Analysez Votre CV
+                      Analyze Your CV
                     </h2>
                     <p className="text-muted-foreground text-sm font-medium">
-                      Copiez-collez le contenu de votre CV pour une analyse approfondie
+                      Copy-paste your CV content for in-depth analysis
                     </p>
                   </div>
                 </div>
                 
                 <div className="space-y-6">
                   <Textarea
-                    placeholder="Collez le contenu de votre CV ici... (expériences, formations, compétences, projets, etc.)"
+                    placeholder="Paste your CV content here... (experience, education, skills, projects, etc.)"
                     value={cvText}
                     onChange={(e) => setCvText(e.target.value)}
                     className="min-h-[320px] text-base leading-relaxed resize-none border-2 focus:border-primary transition-all duration-300 rounded-2xl bg-background/50 shadow-[inset_0_2px_4px_0_hsl(220_20%_15%/0.05)] focus:shadow-[inset_0_2px_8px_0_hsl(220_20%_15%/0.08)]"
@@ -186,12 +186,12 @@ const Index = () => {
                       {isLoading ? (
                         <>
                           <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-                          Analyse en cours...
+                          Analyzing...
                         </>
                       ) : (
                         <>
                           <Sparkles className="mr-3 h-6 w-6" />
-                          Analyser mon CV
+                          Analyze My CV
                         </>
                       )}
                     </Button>
@@ -200,21 +200,21 @@ const Index = () => {
               </div>
             </section>
 
-            {/* Section Mes Compétences (CV) */}
+            {/* My Skills Section (CV) */}
             {skills.length > 0 && (
               <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <div className="mb-8 text-center">
                   <div className="inline-flex items-center gap-3 px-6 py-3 bg-accent/10 border border-accent/20 rounded-full mb-4">
                     <Sparkles className="w-6 h-6 text-accent" />
                     <span className="text-accent font-semibold text-lg">
-                      {skills.length} compétence{skills.length > 1 ? 's' : ''} détectée{skills.length > 1 ? 's' : ''}
+                      {skills.length} skill{skills.length > 1 ? 's' : ''} detected
                     </span>
                   </div>
                   <h2 className="text-4xl font-bold text-foreground">
-                    Mes Compétences (CV)
+                    My Skills (CV)
                   </h2>
                   <p className="text-muted-foreground mt-2">
-                    Voici les compétences extraites de votre CV avec leur niveau de confiance
+                    Here are the skills extracted from your CV with their confidence level
                   </p>
                 </div>
                 
@@ -231,7 +231,7 @@ const Index = () => {
                         evidence={skill.evidence}
                         onDelete={() => {
                           setSkills(skills.filter((_, i) => i !== index));
-                          toast.success("Compétence supprimée");
+                          toast.success("Skill removed");
                         }}
                       />
                     </div>
@@ -247,18 +247,18 @@ const Index = () => {
                   <FileText className="w-12 h-12 text-primary" />
                 </div>
                 <h3 className="text-3xl font-bold text-foreground mb-3">
-                  Prêt à Commencer ?
+                  Ready to Start?
                 </h3>
                 <p className="text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">
-                  Collez le contenu de votre CV dans le champ ci-dessus, puis cliquez sur <span className="font-semibold text-primary">"Analyser mon CV"</span> pour découvrir vos compétences principales avec des scores de confiance détaillés.
+                  Paste your CV content in the field above, then click <span className="font-semibold text-primary">"Analyze My CV"</span> to discover your key skills with detailed confidence scores.
                 </p>
               </section>
             )}
           </TabsContent>
 
-          {/* Onglet 2 : Analyse des Écarts */}
+          {/* Tab 2: Gap Analysis */}
           <TabsContent value="step2" className="space-y-12">
-            {/* Section Analyse des Écarts */}
+            {/* Gap Analysis Section */}
             <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="bg-card rounded-3xl shadow-[0_8px_32px_-8px_hsl(220_20%_15%/0.12)] p-10 border border-border/40 backdrop-blur-sm hover:shadow-[0_12px_48px_-12px_hsl(220_20%_15%/0.18)] transition-shadow duration-500">
                 <div className="flex items-center gap-3 mb-6">
@@ -267,17 +267,17 @@ const Index = () => {
                   </div>
                   <div>
                     <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
-                      Analyse des Écarts de Compétences
+                      Skill Gap Analysis
                     </h2>
                     <p className="text-muted-foreground text-sm font-medium">
-                      Comparez vos compétences avec une offre d'emploi
+                      Compare your skills with a job offer
                     </p>
                   </div>
                 </div>
                 
                 <div className="space-y-6">
                   <Textarea
-                    placeholder="Collez une offre d'emploi ici..."
+                    placeholder="Paste a job offer here..."
                     value={jobText}
                     onChange={(e) => setJobText(e.target.value)}
                     className="min-h-[320px] text-base leading-relaxed resize-none border-2 focus:border-primary transition-all duration-300 rounded-2xl bg-background/50 shadow-[inset_0_2px_4px_0_hsl(220_20%_15%/0.05)] focus:shadow-[inset_0_2px_8px_0_hsl(220_20%_15%/0.08)]"
@@ -293,12 +293,12 @@ const Index = () => {
                       {isLoadingJob ? (
                         <>
                           <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-                          Analyse en cours...
+                          Analyzing...
                         </>
                       ) : (
                         <>
                           <Sparkles className="mr-3 h-6 w-6" />
-                          Analyser l'offre
+                          Analyze Job Offer
                         </>
                       )}
                     </Button>
@@ -307,21 +307,21 @@ const Index = () => {
               </div>
             </section>
 
-            {/* Section Compétences Manquantes */}
+            {/* Missing Skills Section */}
             {missingSkills.length > 0 && (
               <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <div className="mb-8 text-center">
                   <div className="inline-flex items-center gap-3 px-6 py-3 bg-destructive/10 border border-destructive/20 rounded-full mb-4">
                     <Sparkles className="w-6 h-6 text-destructive" />
                     <span className="text-destructive font-semibold text-lg">
-                      {missingSkills.length} compétence{missingSkills.length > 1 ? 's' : ''} manquante{missingSkills.length > 1 ? 's' : ''}
+                      {missingSkills.length} missing skill{missingSkills.length > 1 ? 's' : ''}
                     </span>
                   </div>
                   <h2 className="text-4xl font-bold text-foreground">
-                    Compétences Manquantes pour ce Poste
+                    Missing Skills for this Role
                   </h2>
                   <p className="text-muted-foreground mt-2">
-                    Ces compétences sont demandées dans l'offre mais absentes de votre CV
+                    These skills are required in the job offer but not found in your CV
                   </p>
                 </div>
                 
@@ -338,7 +338,7 @@ const Index = () => {
                         evidence={skill.evidence}
                         onDelete={() => {
                           setMissingSkills(missingSkills.filter((_, i) => i !== index));
-                          toast.success("Compétence supprimée");
+                          toast.success("Skill removed");
                         }}
                       />
                     </div>
@@ -354,10 +354,10 @@ const Index = () => {
       <footer className="bg-card/50 backdrop-blur-sm border-t border-border mt-24 py-10">
         <div className="container mx-auto px-6 text-center">
           <p className="text-muted-foreground text-base font-medium">
-            Réalisé par <span className="text-foreground font-semibold">Chegdati Chouaib</span>
+            Made by <span className="text-foreground font-semibold">Chegdati Chouaib</span>
           </p>
           <p className="text-muted-foreground/60 text-sm mt-2">
-            Propulsé par l'Intelligence Artificielle • {new Date().getFullYear()}
+            Powered by Artificial Intelligence • {new Date().getFullYear()}
           </p>
         </div>
       </footer>
