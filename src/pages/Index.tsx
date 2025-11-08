@@ -55,17 +55,17 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-muted/10 to-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background/95">
       {/* Dashboard Header */}
-      <header className="sticky top-0 z-50 bg-gradient-to-r from-primary via-primary-glow to-primary text-primary-foreground shadow-xl border-b border-primary-foreground/10">
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-primary via-primary-glow to-primary text-primary-foreground shadow-[0_8px_32px_-8px_hsl(215_80%_52%/0.4)] border-b border-primary-foreground/10">
         <div className="container mx-auto px-6 py-8">
           <div className="flex items-center gap-4 justify-center">
-            <div className="p-3 bg-primary-foreground/10 rounded-xl backdrop-blur-sm">
-              <Sparkles className="w-10 h-10" />
+            <div className="p-3 bg-primary-foreground/10 rounded-xl backdrop-blur-sm shadow-inner">
+              <Sparkles className="w-10 h-10 drop-shadow-lg" />
             </div>
             <div>
-              <h1 className="text-5xl font-black tracking-tight">SkillSense</h1>
-              <p className="text-primary-foreground/90 text-lg font-medium mt-1">
+              <h1 className="text-5xl font-black tracking-tight drop-shadow-sm">SkillSense</h1>
+              <p className="text-primary-foreground/95 text-lg font-semibold mt-1 tracking-wide">
                 Analyse de Compétences par IA
               </p>
             </div>
@@ -78,16 +78,16 @@ const Index = () => {
         
         {/* Section Fonctionnalité */}
         <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="bg-card rounded-3xl shadow-2xl p-10 border border-border/50 backdrop-blur-sm">
+          <div className="bg-card rounded-3xl shadow-[0_8px_32px_-8px_hsl(220_20%_15%/0.12)] p-10 border border-border/40 backdrop-blur-sm hover:shadow-[0_12px_48px_-12px_hsl(220_20%_15%/0.18)] transition-shadow duration-500">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <FileText className="w-7 h-7 text-primary" />
+              <div className="p-2 bg-accent/10 rounded-xl shadow-sm border border-accent/20">
+                <FileText className="w-7 h-7 text-accent" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-foreground">
+                <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
                   Analysez Votre CV
                 </h2>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-sm font-medium">
                   Copiez-collez le contenu de votre CV pour une analyse approfondie
                 </p>
               </div>
@@ -98,7 +98,7 @@ const Index = () => {
                 placeholder="Collez le contenu de votre CV ici... (expériences, formations, compétences, projets, etc.)"
                 value={cvText}
                 onChange={(e) => setCvText(e.target.value)}
-                className="min-h-[320px] text-base leading-relaxed resize-none border-2 focus:border-primary transition-all duration-300 rounded-xl bg-background/50"
+                className="min-h-[320px] text-base leading-relaxed resize-none border-2 focus:border-primary transition-all duration-300 rounded-2xl bg-background/50 shadow-[inset_0_2px_4px_0_hsl(220_20%_15%/0.05)] focus:shadow-[inset_0_2px_8px_0_hsl(220_20%_15%/0.08)]"
               />
               
               <div className="flex justify-end">
@@ -106,7 +106,7 @@ const Index = () => {
                   onClick={handleAnalyze}
                   disabled={isLoading || !cvText.trim()}
                   size="lg"
-                  className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary text-primary-foreground font-bold px-10 py-7 text-lg shadow-lg hover:shadow-2xl transition-all duration-300 rounded-xl"
+                  className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary text-primary-foreground font-bold px-10 py-7 text-lg shadow-lg hover:shadow-[0_12px_48px_-12px_hsl(215_80%_52%/0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-2xl"
                 >
                   {isLoading ? (
                     <>
