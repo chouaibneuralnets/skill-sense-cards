@@ -25,11 +25,10 @@ Deno.serve(async (req) => {
   try {
     const { cvText } = await req.json();
     
-    // !!! HACKATHON SOLUTION: Clé API en dur !!!
-    const GOOGLE_API_KEY = "AIzaSyBcL7DKpoCebeuGEOUnJOk8so_mbKI1ruY";
+    const GOOGLE_API_KEY = Deno.env.get('GOOGLE_API_KEY');
 
     if (!GOOGLE_API_KEY) {
-      console.error('ERREUR: GOOGLE_API_KEY n\'est pas configurée dans le code !');
+      console.error('ERROR: GOOGLE_API_KEY is not configured in environment!');
       return new Response(
         JSON.stringify({ error: 'Configuration error: API Key missing' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
