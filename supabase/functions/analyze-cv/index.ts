@@ -4,7 +4,7 @@ import {
   GoogleGenerativeAI,
   HarmCategory,
   HarmBlockThreshold,
-} from "https://esm.sh/@google/generative-ai@0.3.1";
+} from "https://esm.sh/@google/generative-ai@0.21.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -38,10 +38,10 @@ Deno.serve(async (req) => {
 
     const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-pro",
+      model: "gemini-1.5-flash-latest",
     });
 
-    console.log('Analyse du CV avec Gemini Pro...');
+    console.log('Analyse du CV avec Gemini 1.5 Flash...');
 
     const prompt = `
       Tu es un expert en recrutement technique et RH. Analyse le texte de CV suivant.
