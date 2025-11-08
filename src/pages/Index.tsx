@@ -160,7 +160,7 @@ const Index = () => {
       <footer className="bg-card border-t border-border mt-20 py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
           <p className="text-sm">
-            Propulsé par l'intelligence artificielle • SkillSense {new Date().getFullYear()}
+            Réalisé par Chegdati Chouaib
           </p>
         </div>
       </footer>
