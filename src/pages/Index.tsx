@@ -357,7 +357,7 @@ const Index = () => {
             Made by <span className="text-foreground font-semibold">Chegdati Chouaib</span>
           </p>
           <p className="text-muted-foreground/60 text-sm mt-2">
-            Powered by Artificial Intelligence • {new Date().getFullYear()}
+            SAP Challenge @ Hack-Nation's Global AI Hackathon
           </p>
         </div>
       </footer>
