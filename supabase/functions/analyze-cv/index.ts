@@ -25,10 +25,11 @@ Deno.serve(async (req) => {
   try {
     const { cvText } = await req.json();
     
-    const GOOGLE_API_KEY = Deno.env.get('GOOGLE_API_KEY');
+    // !!! HACKATHON SOLUTION: Clé API en dur !!!
+    const GOOGLE_API_KEY = "AIzaSyBcL7DKpoCebeuGEOUnJOk8so_mbKI1ruY";
 
     if (!GOOGLE_API_KEY) {
-      console.error('ERREUR: GOOGLE_API_KEY n\'est pas configurée');
+      console.error('ERREUR: GOOGLE_API_KEY n\'est pas configurée dans le code !');
       return new Response(
         JSON.stringify({ error: 'Configuration error: API Key missing' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -37,10 +38,10 @@ Deno.serve(async (req) => {
 
     const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash-lite-latest",
+      model: "gemini-1.5-flash-latest",
     });
 
-    console.log('Analyse du CV avec Gemini Flash-Lite...');
+    console.log('Analyse du CV avec Gemini Flash...');
 
     const prompt = `
       Tu es un expert en recrutement technique et RH. Analyse le texte de CV suivant.
@@ -73,9 +74,12 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Erreur dans la fonction d\'analyse:', error);
+    console.error('Erreur détaillée dans la fonction d\'analyse:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ 
+        error: "Erreur d'analyse IA", 
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
