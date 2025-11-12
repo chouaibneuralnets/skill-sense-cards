@@ -11,7 +11,8 @@ const corsHeaders = {
 
 interface LearningRecommendation {
   skill: string;
-  courseKeyword: string;
+  course_title: string;
+  course_link: string;
 }
 
 Deno.serve(async (req) => {
@@ -42,9 +43,9 @@ Deno.serve(async (req) => {
     const skillsList = missingSkills.map((s: any) => s.name).join(', ');
     
     const prompt = `
-      For the following list of missing skills: ${skillsList}
+      For each of the following missing skills: ${skillsList}
       
-      For each skill, suggest a search keyword for an online course (for example: 'AWS Sagemaker' -> 'Complete AWS Sagemaker Course').
+      Suggest a credible online course from platforms like Coursera, edX, Udemy, LinkedIn Learning, or other recognized providers.
       
       Your response MUST be ONLY a JSON object with a single key "recommendations".
       The value of "recommendations" must be an array. Return nothing else but this JSON object.
@@ -52,8 +53,11 @@ Deno.serve(async (req) => {
       Use this exact format for each recommendation:
       {
         "skill": "Name of the skill",
-        "courseKeyword": "Suggested course search keyword"
+        "course_title": "Title of the Suggested Course",
+        "course_link": "Complete URL of a credible online course on this topic (ex: https://www.coursera.org/learn/...)"
       }
+      
+      IMPORTANT: Provide real, working URLs to actual courses that exist on these platforms.
     `;
 
     const result = await model.generateContent(prompt);

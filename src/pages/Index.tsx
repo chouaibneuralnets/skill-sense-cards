@@ -15,7 +15,8 @@ interface Skill {
 
 interface LearningRecommendation {
   skill: string;
-  courseKeyword: string;
+  course_title: string;
+  course_link: string;
 }
 
 const normalizeSkill = (skillName: string): string => {
@@ -435,29 +436,34 @@ const Index = () => {
                       className="animate-in fade-in slide-in-from-bottom-4 bg-gradient-to-br from-card to-card/80 rounded-2xl shadow-lg p-8 border border-border/40 hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-primary/10 rounded-xl shadow-sm border border-primary/20 shrink-0">
-                          <Sparkles className="w-6 h-6 text-primary" />
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 bg-primary/10 rounded-xl shadow-sm border border-primary/20 shrink-0">
+                            <Sparkles className="w-6 h-6 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-xl font-bold text-foreground mb-2">
+                              {recommendation.skill}
+                            </h3>
+                            <p className="text-muted-foreground text-sm mb-2">
+                              Recommended course:
+                            </p>
+                            <p className="text-foreground font-medium text-base mb-4">
+                              {recommendation.course_title}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-xl font-bold text-foreground mb-2 truncate">
-                            {recommendation.skill}
-                          </h3>
-                          <p className="text-muted-foreground text-sm mb-4">
-                            Recommended course:
-                          </p>
-                          <a
-                            href={`https://www.google.com/search?q=${encodeURIComponent(recommendation.courseKeyword)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-glow transition-colors duration-200 text-sm font-semibold shadow-sm hover:shadow-md"
-                          >
-                            {recommendation.courseKeyword}
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                          </a>
-                        </div>
+                        <a
+                          href={recommendation.course_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary-glow transition-all duration-200 text-sm font-semibold shadow-sm hover:shadow-md w-full"
+                        >
+                          View Course
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
                       </div>
                     </div>
                   ))}
