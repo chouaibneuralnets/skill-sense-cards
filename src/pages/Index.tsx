@@ -29,6 +29,7 @@ const normalizeSkill = (skillName: string): string => {
 
 const Index = () => {
   const [cvText, setCvText] = useState("");
+  const [githubUsername, setGithubUsername] = useState("");
   const [skills, setSkills] = useState<Skill[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [jobText, setJobText] = useState("");
@@ -41,8 +42,8 @@ const Index = () => {
   const [hasAnalyzedJob, setHasAnalyzedJob] = useState(false);
 
   const handleAnalyze = async () => {
-    if (!cvText.trim()) {
-      toast.error("Please paste your CV content");
+    if (!cvText.trim() && !githubUsername.trim()) {
+      toast.error("Please paste your CV content or provide a GitHub username");
       return;
     }
 
@@ -51,7 +52,10 @@ const Index = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('analyze-cv', {
-        body: { cvText }
+        body: { 
+          cvText,
+          githubUsername: githubUsername.trim() || undefined
+        }
       });
 
       if (error) {
@@ -228,10 +232,24 @@ const Index = () => {
                     className="min-h-[320px] text-base leading-relaxed resize-none border-2 focus:border-primary transition-all duration-300 rounded-2xl bg-background/50 shadow-[inset_0_2px_4px_0_hsl(220_20%_15%/0.05)] focus:shadow-[inset_0_2px_8px_0_hsl(220_20%_15%/0.08)]"
                   />
                   
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span className="font-medium">OR</span>
+                      <div className="flex-1 h-px bg-border"></div>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Or paste your GitHub username here (ex: chouaibneuralnets)"
+                      value={githubUsername}
+                      onChange={(e) => setGithubUsername(e.target.value)}
+                      className="w-full px-4 py-3 text-base border-2 border-border rounded-xl bg-background/50 focus:border-primary focus:outline-none transition-all duration-300 shadow-[inset_0_2px_4px_0_hsl(220_20%_15%/0.05)] focus:shadow-[inset_0_2px_8px_0_hsl(220_20%_15%/0.08)]"
+                    />
+                  </div>
+                  
                   <div className="flex justify-end">
                     <Button
                       onClick={handleAnalyze}
-                      disabled={isLoading || !cvText.trim()}
+                      disabled={isLoading || (!cvText.trim() && !githubUsername.trim())}
                       size="lg"
                       className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary text-primary-foreground font-bold px-10 py-7 text-lg shadow-lg hover:shadow-[0_12px_48px_-12px_hsl(215_80%_52%/0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-2xl"
                     >
