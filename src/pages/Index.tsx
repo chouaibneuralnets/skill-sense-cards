@@ -37,6 +37,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("step1");
   const [learningRecommendations, setLearningRecommendations] = useState<LearningRecommendation[]>([]);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
+  const [hasAnalyzedJob, setHasAnalyzedJob] = useState(false);
 
   const handleAnalyze = async () => {
     if (!cvText.trim()) {
@@ -116,6 +117,7 @@ const Index = () => {
         );
         
         setMissingSkills(missing);
+        setHasAnalyzedJob(true);
         toast.success(`${missing.length} missing skill${missing.length > 1 ? 's' : ''} detected!`);
         
         // Automatically get learning recommendations
@@ -154,6 +156,8 @@ const Index = () => {
       if (data?.recommendations) {
         setLearningRecommendations(data.recommendations);
         toast.success(`${data.recommendations.length} learning recommendation${data.recommendations.length > 1 ? 's' : ''} generated!`);
+        // Automatically switch to Step 3 to show recommendations
+        setActiveTab("step3");
       }
     } catch (error) {
       console.error('Error:', error);
@@ -185,12 +189,15 @@ const Index = () => {
       {/* Dashboard Main Content */}
       <main className="container mx-auto px-6 py-12 max-w-7xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-12">
+          <TabsList className="grid w-full grid-cols-3 mb-12">
             <TabsTrigger value="step1" className="text-lg py-4">
               Step 1: My Skill Profile
             </TabsTrigger>
             <TabsTrigger value="step2" disabled={skills.length === 0} className="text-lg py-4">
               Step 2: Gap Analysis
+            </TabsTrigger>
+            <TabsTrigger value="step3" disabled={!hasAnalyzedJob || missingSkills.length === 0} className="text-lg py-4">
+              Step 3: Learning Plan
             </TabsTrigger>
           </TabsList>
 
@@ -390,7 +397,10 @@ const Index = () => {
                 </div>
               </section>
             )}
+          </TabsContent>
 
+          {/* Tab 3: Learning Plan */}
+          <TabsContent value="step3" className="space-y-12">
             {/* Learning Recommendations Section */}
             {isLoadingRecommendations && (
               <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -411,7 +421,7 @@ const Index = () => {
                     </span>
                   </div>
                   <h2 className="text-4xl font-bold text-foreground">
-                    Personalized Learning Recommendations
+                    Personalized Learning Plan
                   </h2>
                   <p className="text-muted-foreground mt-2">
                     Suggested online courses to bridge your skill gaps
@@ -451,6 +461,23 @@ const Index = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              </section>
+            )}
+
+            {/* Empty State */}
+            {!isLoadingRecommendations && learningRecommendations.length === 0 && (
+              <section className="animate-in fade-in slide-in-from-bottom-4 duration-700 text-center py-20">
+                <div className="max-w-2xl mx-auto">
+                  <div className="p-4 bg-primary/10 rounded-full inline-flex mb-6">
+                    <Sparkles className="w-16 h-16 text-primary" />
+                  </div>
+                  <h3 className="text-3xl font-bold text-foreground mb-4">
+                    Your Learning Plan
+                  </h3>
+                  <p className="text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">
+                    Once you analyze a job offer in Step 2, personalized learning recommendations will appear here to help you bridge your skill gaps.
+                  </p>
                 </div>
               </section>
             )}
