@@ -2,10 +2,21 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { SkillCard } from "@/components/SkillCard";
-import { Loader2, Sparkles, FileText } from "lucide-react";
+import { Loader2, Sparkles, FileText, Target, GraduationCap, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 interface Skill {
   name: string;
@@ -173,41 +184,109 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background/95">
-      {/* Dashboard Header */}
-      <header className="sticky top-0 z-50 bg-gradient-to-r from-primary via-primary-glow to-primary text-primary-foreground shadow-[0_8px_32px_-8px_hsl(215_80%_52%/0.4)] border-b border-primary-foreground/10">
-        <div className="container mx-auto px-6 py-8">
-          <div className="flex items-center gap-4 justify-center">
-            <div className="p-3 bg-primary-foreground/10 rounded-xl backdrop-blur-sm shadow-inner">
-              <Sparkles className="w-10 h-10 drop-shadow-lg" />
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-muted/20 to-background/95">
+        {/* Sidebar Navigation */}
+        <Sidebar className="border-r border-border/40 bg-card/50 backdrop-blur-sm">
+          <SidebarContent>
+            <div className="p-6 border-b border-border/40">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-xl shadow-sm">
+                  <Sparkles className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-foreground">SkillSense</h2>
+                  <p className="text-xs text-muted-foreground">Pro Dashboard</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <h1 className="text-5xl font-black tracking-tight drop-shadow-sm">SkillSense</h1>
-              <p className="text-primary-foreground/95 text-lg font-semibold mt-1 tracking-wide">
-                AI Skill Analysis
-              </p>
+
+            <SidebarGroup>
+              <SidebarGroupContent className="px-4 py-6">
+                <SidebarMenu className="space-y-2">
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      onClick={() => setActiveTab("step1")}
+                      className={`w-full justify-start gap-3 h-12 rounded-xl transition-all duration-200 ${
+                        activeTab === "step1"
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                          : "hover:bg-muted/50"
+                      }`}
+                    >
+                      <FileText className="w-5 h-5" />
+                      <span className="font-semibold">Step 1: Skill Profile</span>
+                      {activeTab === "step1" && <ChevronRight className="w-4 h-4 ml-auto" />}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      onClick={() => skills.length > 0 && setActiveTab("step2")}
+                      disabled={skills.length === 0}
+                      className={`w-full justify-start gap-3 h-12 rounded-xl transition-all duration-200 ${
+                        activeTab === "step2"
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                          : skills.length === 0
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:bg-muted/50"
+                      }`}
+                    >
+                      <Target className="w-5 h-5" />
+                      <span className="font-semibold">Step 2: Gap Analysis</span>
+                      {activeTab === "step2" && <ChevronRight className="w-4 h-4 ml-auto" />}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      onClick={() => hasAnalyzedJob && missingSkills.length > 0 && setActiveTab("step3")}
+                      disabled={!hasAnalyzedJob || missingSkills.length === 0}
+                      className={`w-full justify-start gap-3 h-12 rounded-xl transition-all duration-200 ${
+                        activeTab === "step3"
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                          : !hasAnalyzedJob || missingSkills.length === 0
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:bg-muted/50"
+                      }`}
+                    >
+                      <GraduationCap className="w-5 h-5" />
+                      <span className="font-semibold">Step 3: Learning Plan</span>
+                      {activeTab === "step3" && <ChevronRight className="w-4 h-4 ml-auto" />}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <header className="sticky top-0 z-50 bg-gradient-to-r from-primary via-primary-glow to-primary text-primary-foreground shadow-[0_8px_32px_-8px_hsl(215_80%_52%/0.4)] border-b border-primary-foreground/10">
+            <div className="container mx-auto px-6 py-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <SidebarTrigger className="text-primary-foreground hover:bg-primary-foreground/10" />
+                  <div>
+                    <h1 className="text-4xl font-black tracking-tight drop-shadow-sm">SkillSense Pro</h1>
+                    <p className="text-primary-foreground/90 text-base font-semibold mt-0.5 tracking-wide">
+                      AI-Powered Skill Analysis Dashboard
+                    </p>
+                  </div>
+                </div>
+                <div className="p-3 bg-primary-foreground/10 rounded-xl backdrop-blur-sm shadow-inner">
+                  <Sparkles className="w-8 h-8 drop-shadow-lg" />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </header>
+          </header>
 
-      {/* Dashboard Main Content */}
-      <main className="container mx-auto px-6 py-12 max-w-7xl">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-12">
-            <TabsTrigger value="step1" className="text-lg py-4">
-              Step 1: My Skill Profile
-            </TabsTrigger>
-            <TabsTrigger value="step2" disabled={skills.length === 0} className="text-lg py-4">
-              Step 2: Gap Analysis
-            </TabsTrigger>
-            <TabsTrigger value="step3" disabled={!hasAnalyzedJob || missingSkills.length === 0} className="text-lg py-4">
-              Step 3: Learning Plan
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Tab 1: My Skill Profile */}
-          <TabsContent value="step1" className="space-y-8">
+          {/* Main Content */}
+          <main className="flex-1 container mx-auto px-6 py-12 max-w-7xl">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              {/* Tab 1: My Skill Profile */}
+              <TabsContent value="step1" className="space-y-8 mt-0">
             <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="bg-card rounded-3xl shadow-[0_8px_32px_-8px_hsl(220_20%_15%/0.12)] p-10 border border-border/40 backdrop-blur-sm hover:shadow-[0_12px_48px_-12px_hsl(220_20%_15%/0.18)] transition-shadow duration-500">
                 <div className="flex items-center gap-3 mb-6">
@@ -506,21 +585,23 @@ const Index = () => {
               </section>
             )}
           </TabsContent>
-        </Tabs>
-      </main>
+            </Tabs>
+          </main>
 
-      {/* Dashboard Footer */}
-      <footer className="bg-card/50 backdrop-blur-sm border-t border-border mt-24 py-10">
-        <div className="container mx-auto px-6 text-center">
-          <p className="text-muted-foreground text-base font-medium">
-            Made by <span className="text-foreground font-semibold">Chegdati Chouaib</span>
-          </p>
-          <p className="text-muted-foreground/60 text-sm mt-2">
-            SAP Challenge @ Hack-Nation's Global AI Hackathon
-          </p>
+          {/* Footer */}
+          <footer className="bg-card/50 backdrop-blur-sm border-t border-border mt-auto py-8">
+            <div className="container mx-auto px-6 text-center">
+              <p className="text-muted-foreground text-base font-medium">
+                Made by <span className="text-foreground font-semibold">Chegdati Chouaib</span>
+              </p>
+              <p className="text-muted-foreground/60 text-sm mt-2">
+                SAP Challenge @ Hack-Nation's Global AI Hackathon
+              </p>
+            </div>
+          </footer>
         </div>
-      </footer>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
