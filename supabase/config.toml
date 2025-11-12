@@ -2,3 +2,6 @@ project_id = "riqrvpqaqlzbxiicghyv"
 
 [functions.analyze-cv]
 verify_jwt = false
+
+[functions.get-learning-recommendations]
+verify_jwt = false

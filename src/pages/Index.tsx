@@ -13,6 +13,11 @@ interface Skill {
   evidence: string;
 }
 
+interface LearningRecommendation {
+  skill: string;
+  courseKeyword: string;
+}
+
 const normalizeSkill = (skillName: string): string => {
   if (!skillName) return '';
   return skillName
@@ -30,6 +35,8 @@ const Index = () => {
   const [isLoadingJob, setIsLoadingJob] = useState(false);
   const [missingSkills, setMissingSkills] = useState<Skill[]>([]);
   const [activeTab, setActiveTab] = useState("step1");
+  const [learningRecommendations, setLearningRecommendations] = useState<LearningRecommendation[]>([]);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
 
   const handleAnalyze = async () => {
     if (!cvText.trim()) {
@@ -110,12 +117,49 @@ const Index = () => {
         
         setMissingSkills(missing);
         toast.success(`${missing.length} missing skill${missing.length > 1 ? 's' : ''} detected!`);
+        
+        // Automatically get learning recommendations
+        if (missing.length > 0) {
+          getLearningRecommendations(missing);
+        }
       }
     } catch (error) {
       console.error('Error:', error);
       toast.error("An error occurred");
     } finally {
       setIsLoadingJob(false);
+    }
+  };
+
+  const getLearningRecommendations = async (skills: Skill[]) => {
+    setIsLoadingRecommendations(true);
+    setLearningRecommendations([]);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('get-learning-recommendations', {
+        body: { missingSkills: skills }
+      });
+
+      if (error) {
+        console.error('Error calling function:', error);
+        toast.error("Error generating learning recommendations");
+        return;
+      }
+
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      if (data?.recommendations) {
+        setLearningRecommendations(data.recommendations);
+        toast.success(`${data.recommendations.length} learning recommendation${data.recommendations.length > 1 ? 's' : ''} generated!`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("An error occurred while generating recommendations");
+    } finally {
+      setIsLoadingRecommendations(false);
     }
   };
 
@@ -341,6 +385,70 @@ const Index = () => {
                           toast.success("Skill removed");
                         }}
                       />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Learning Recommendations Section */}
+            {isLoadingRecommendations && (
+              <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="bg-card rounded-3xl shadow-lg p-10 border border-border/40 text-center">
+                  <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
+                  <p className="text-muted-foreground text-lg">Generating personalized learning recommendations...</p>
+                </div>
+              </section>
+            )}
+
+            {learningRecommendations.length > 0 && (
+              <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="mb-8 text-center">
+                  <div className="inline-flex items-center gap-3 px-6 py-3 bg-primary/10 border border-primary/20 rounded-full mb-4">
+                    <Sparkles className="w-6 h-6 text-primary" />
+                    <span className="text-primary font-semibold text-lg">
+                      {learningRecommendations.length} learning recommendation{learningRecommendations.length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <h2 className="text-4xl font-bold text-foreground">
+                    Personalized Learning Recommendations
+                  </h2>
+                  <p className="text-muted-foreground mt-2">
+                    Suggested online courses to bridge your skill gaps
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {learningRecommendations.map((recommendation, index) => (
+                    <div
+                      key={index}
+                      className="animate-in fade-in slide-in-from-bottom-4 bg-gradient-to-br from-card to-card/80 rounded-2xl shadow-lg p-8 border border-border/40 hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 bg-primary/10 rounded-xl shadow-sm border border-primary/20 shrink-0">
+                          <Sparkles className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xl font-bold text-foreground mb-2 truncate">
+                            {recommendation.skill}
+                          </h3>
+                          <p className="text-muted-foreground text-sm mb-4">
+                            Recommended course:
+                          </p>
+                          <a
+                            href={`https://www.google.com/search?q=${encodeURIComponent(recommendation.courseKeyword)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-glow transition-colors duration-200 text-sm font-semibold shadow-sm hover:shadow-md"
+                          >
+                            {recommendation.courseKeyword}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
