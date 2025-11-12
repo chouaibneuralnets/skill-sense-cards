@@ -23,9 +23,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { cvText } = await req.json();
+    const { cvText, githubUsername } = await req.json();
     
     const GOOGLE_API_KEY = Deno.env.get('GOOGLE_API_KEY');
+    const GITHUB_TOKEN = Deno.env.get('GITHUB_TOKEN');
 
     if (!GOOGLE_API_KEY) {
       console.error('ERROR: GOOGLE_API_KEY is not configured in environment!');
@@ -35,30 +36,111 @@ Deno.serve(async (req) => {
       );
     }
 
+    let finalText = cvText || '';
+
+    // If GitHub username is provided, fetch and merge GitHub data
+    if (githubUsername) {
+      console.log(`Fetching GitHub data for username: ${githubUsername}`);
+      
+      try {
+        const headers: HeadersInit = {
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'SkillSense-App'
+        };
+        
+        if (GITHUB_TOKEN) {
+          headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
+        }
+
+        // Fetch user profile
+        const userResponse = await fetch(`https://api.github.com/users/${githubUsername}`, { headers });
+        
+        if (!userResponse.ok) {
+          console.error(`GitHub API error: ${userResponse.status}`);
+          return new Response(
+            JSON.stringify({ error: `GitHub user not found: ${githubUsername}` }),
+            { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        const userData = await userResponse.json();
+        
+        // Fetch repositories
+        const reposResponse = await fetch(`https://api.github.com/users/${githubUsername}/repos?sort=updated&per_page=10`, { headers });
+        const reposData = await reposResponse.json();
+
+        // Build GitHub profile text
+        let githubText = `\n\n=== GITHUB PROFILE ===\n`;
+        githubText += `Username: ${userData.login}\n`;
+        if (userData.name) githubText += `Name: ${userData.name}\n`;
+        if (userData.bio) githubText += `Bio: ${userData.bio}\n`;
+        if (userData.company) githubText += `Company: ${userData.company}\n`;
+        if (userData.location) githubText += `Location: ${userData.location}\n`;
+        githubText += `Public Repos: ${userData.public_repos}\n`;
+        githubText += `Followers: ${userData.followers}\n`;
+        
+        if (Array.isArray(reposData) && reposData.length > 0) {
+          githubText += `\nRecent Repositories:\n`;
+          reposData.forEach((repo: any) => {
+            githubText += `- ${repo.name}: ${repo.description || 'No description'}\n`;
+            if (repo.language) githubText += `  Language: ${repo.language}\n`;
+            if (repo.topics && repo.topics.length > 0) {
+              githubText += `  Topics: ${repo.topics.join(', ')}\n`;
+            }
+          });
+        }
+
+        githubText += `=== END GITHUB PROFILE ===\n`;
+        
+        // Merge with CV text
+        finalText = cvText ? `${cvText}${githubText}` : githubText;
+        
+        console.log('Successfully merged GitHub data with CV text');
+      } catch (githubError) {
+        console.error('Error fetching GitHub data:', githubError);
+        // Continue with just CV text if GitHub fetch fails
+        if (!cvText) {
+          return new Response(
+            JSON.stringify({ error: 'Failed to fetch GitHub data and no CV text provided' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    }
+
+    if (!finalText.trim()) {
+      return new Response(
+        JSON.stringify({ error: 'No content to analyze (provide CV text or GitHub username)' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash-lite",
     });
 
-    console.log('Analyse du CV avec Gemini 2.5 Flash Lite...');
+    console.log('Analyzing merged content with Gemini 2.5 Flash Lite...');
 
     const prompt = `
-      Tu es un expert en recrutement technique et RH. Analyse le texte de CV suivant.
-      Extrais toutes les compétences techniques et non techniques.
+      You are an expert in technical recruitment and HR. Analyze the following merged text (which may contain CV content and/or GitHub profile information).
+      Extract all technical and non-technical skills.
       
-      Ta réponse doit être *uniquement* un objet JSON avec une seule clé "skills".
-      La valeur de "skills" doit être un tableau. Ne renvoie rien d'autre que cet objet JSON.
+      Your response must be *only* a JSON object with a single key "skills".
+      The value of "skills" must be an array. Return nothing else but this JSON object.
       
-      Pour chaque compétence, utilise ce format exact :
+      For each skill, use this exact format:
       {
-        "name": "Nom de la compétence",
+        "name": "Skill name",
         "confidence": 100,
-        "evidence": "Une citation exacte du CV (max 15 mots)"
+        "evidence": "An exact quote from the text (max 15 words)"
       }
-      (remplace 100 par un score de confiance de 1 à 100)
+      (replace 100 with a confidence score from 1 to 100)
+      
+      Pay attention to skills mentioned in both CV and GitHub profile - these should have higher confidence scores.
     `;
 
-    const result = await model.generateContent(`${prompt}\n\nCV:\n${cvText}`);
+    const result = await model.generateContent(`${prompt}\n\nMERGED CONTENT:\n${finalText}`);
     const response = await result.response;
     let jsonText = response.text();
     
